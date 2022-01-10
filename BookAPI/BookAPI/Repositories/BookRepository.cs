@@ -9,15 +9,16 @@ namespace BookAPI.Repositories
 {
     public class BookRepository : IBookRepository
     {
-        public readonly BookContext _context;
+        public readonly Model.AppContext _context;
 
-        public BookRepository(BookContext context)
+        public BookRepository(Model.AppContext context)
         {
             _context = context;
         }
         public async Task<Book> Create(Book book)
         {
-            _context.Books.Add(book);
+            
+            _context.Books.AddAsync(book);
             await _context.SaveChangesAsync();
 
             return book;
@@ -32,15 +33,19 @@ namespace BookAPI.Repositories
 
         public async Task<IEnumerable<Book>> Get()
         {
+
             return await _context.Books.ToListAsync();
         }
 
+
         public async Task<Book> Get(int id)
         {
-            return await _context.Books.FindAsync(id);
+            var BookReturn = _context.Books.FirstAsync(i => i.Id == id);
+            return await BookReturn;
+
         }
 
-        public async Task Update(Book book)
+            public async Task Update(Book book)
         {
             _context.Entry(book).State = EntityState.Modified;
             await _context.SaveChangesAsync();

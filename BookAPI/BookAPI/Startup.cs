@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BookAPI
@@ -29,9 +30,11 @@ namespace BookAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+           
             string mysqlConecction = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<BookContext>(x => x.UseMySql(mysqlConecction, ServerVersion.AutoDetect(mysqlConecction)));
+            services.AddDbContext<Model.AppContext>(x => x.UseMySql(mysqlConecction, ServerVersion.AutoDetect(mysqlConecction)));
             services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -40,10 +43,11 @@ namespace BookAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, Model.AppContext context)
         {
             if (env.IsDevelopment())
             {
+                context.Database.EnsureCreated();
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BookAPI v1"));
